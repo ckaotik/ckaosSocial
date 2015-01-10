@@ -1,0 +1,15 @@
+## Interface: 60000
+## Version: 6.0v1
+## Author: ckaotik
+
+## Title: ckaosSocial
+## Notes: Friends & Guild LDB plugin
+
+#@no-lib-strip@
+# libraries
+libs\LibStub.lua
+libs\LibDataBroker-1.1.lua
+libs\LibQTip-1.0\LibQTip-1.0.xml
+#@end-no-lib-strip@
+
+ckaosSocial.lua
