@@ -161,12 +161,6 @@ local function TooltipAddBNetContacts(tooltip)
 					infoText = icons['NOTE']..noteText
 				end
 
-				if (not realmName or realmName == '') and (not zoneName or zoneName == '')
-					and gameText and gameText ~= '' then
-					zoneName, realmName = strsplit('-', gameText)
-					zoneName, realmName = zoneName and zoneName:trim(), realmName and realmName:trim()
-				end
-
 				lineNum = tooltip:AddLine(
 					status,
 					icons[client],
@@ -177,12 +171,20 @@ local function TooltipAddBNetContacts(tooltip)
 				)
 
 				if client == BNET_CLIENT_WOW then
+					if (not realmName or realmName == '') and (not zoneName or zoneName == '')
+						and gameText and gameText ~= '' then
+						zoneName, realmName = strsplit('-', gameText)
+						zoneName, realmName = zoneName and zoneName:trim(), realmName and realmName:trim()
+					end
+
 					realmName = ((faction == 'Horde' and RED_FONT_COLOR_CODE)
 						or (faction == 'Alliance' and BATTLENET_FONT_COLOR_CODE)
 						or '') .. realmName .. '|r'
 					tooltip:SetCell(lineNum, 2, level)
 					tooltip:SetCell(lineNum, 4, realmName)
 					tooltip:SetCell(lineNum, 5, zoneName)
+				else
+					tooltip:SetCell(lineNum, 4, gameText, 2)
 				end
 
 				if broadcastText and broadcastText ~= '' then
