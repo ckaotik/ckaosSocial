@@ -17,14 +17,7 @@ local playerFaction = UnitFactionGroup('player')
 local playerRealm = GetRealmName()
 local colorFormat = '|cff%02x%02x%02x%s|r'
 local classColors = {} -- to map female/male class names to colors
-local BNET_CLIENT_APP = 'App' -- since there is no global for this
-local icons = {
-	-- see BNet_GetClientTexture(client)
-	[BNET_CLIENT_APP]  = BNet_GetClientEmbeddedTexture(BNET_CLIENT_APP, 0),
-	[BNET_CLIENT_WOW]  = BNet_GetClientEmbeddedTexture(BNET_CLIENT_WOW, 0),
-	[BNET_CLIENT_SC2]  = BNet_GetClientEmbeddedTexture(BNET_CLIENT_SC2, 0),
-	[BNET_CLIENT_D3]   = BNet_GetClientEmbeddedTexture(BNET_CLIENT_D3, 0),
-	[BNET_CLIENT_WTCG] = BNet_GetClientEmbeddedTexture(BNET_CLIENT_WTCG, 0),
+local icons = { -- @see BNet_GetClientTexture(client)
 	['NONE']           = '|TInterface\\FriendsFrame\\BattleNet-BattleNetIcon:0|t',
 	[CHAT_FLAG_AFK]    = '|T'..FRIENDS_TEXTURE_AFK..':0|t',
 	[CHAT_FLAG_DND]    = '|T'..FRIENDS_TEXTURE_DND..':0|t',
@@ -52,7 +45,7 @@ end
 
 local function ShowTooltip(self)
 	if not self.tiptext and not self.link then return end
-	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+	GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
 	GameTooltip:SetText(self.tiptext, nil, nil, nil, nil, true)
 	GameTooltip:Show()
 end
@@ -64,7 +57,7 @@ local function SortGuildList(self, sortType, btn, up)
 end
 
 local function OnCharacterClick(self, character, btn, up)
-	local contactType, contactInfo = strsplit(":", character)
+	local contactType, contactInfo = strsplit(':', character)
 	if IsAltKeyDown() then
 		-- invite
 		if contactType == 'bnet' then
@@ -95,9 +88,9 @@ local function OnCharacterClick(self, character, btn, up)
 				end
 			end
 			if btn == 'RightButton' and CanEditOfficerNote() then
-				StaticPopup_Show("SET_GUILDOFFICERNOTE")
+				StaticPopup_Show('SET_GUILDOFFICERNOTE')
 			elseif CanEditPublicNote() then
-				StaticPopup_Show("SET_GUILDPLAYERNOTE")
+				StaticPopup_Show('SET_GUILDPLAYERNOTE')
 			end
 		elseif contactType == 'friend' then
 			for index = 1, select(2, GetNumFriends()) do
@@ -107,10 +100,10 @@ local function OnCharacterClick(self, character, btn, up)
 					break
 				end
 			end
-			StaticPopup_Show("SET_FRIENDNOTE", GetFriendInfo(FriendsFrame.NotesID))
+			StaticPopup_Show('SET_FRIENDNOTE', GetFriendInfo(FriendsFrame.NotesID))
 		elseif contactType == 'bnet' then
 			FriendsFrame.NotesID = contactInfo
-			StaticPopup_Show("SET_BNFRIENDNOTE")
+			StaticPopup_Show('SET_BNFRIENDNOTE')
 		end
 	else
 		-- whisper and /who
@@ -118,7 +111,7 @@ local function OnCharacterClick(self, character, btn, up)
 		if contactType == 'bnet' then
 			local friendIndex = BNGetFriendIndex(contactInfo)
 			local presenceID, presenceName = BNGetFriendInfo(friendIndex)
-			contactInfo = presenceName..":"..presenceID
+			contactInfo = presenceName..':'..presenceID
 			prefix = 'BN'..prefix
 		end
 		SetItemRef(prefix..contactInfo, '|H'..prefix..contactInfo..'|h['..contactInfo..']|h', 'LeftButton')
@@ -127,7 +120,7 @@ end
 
 local function TooltipAddBNetContacts(tooltip)
 	local _, numBNetOnline = BNGetNumFriends()
-	local numColumns, lineNum = #tooltip.columns
+	local numColumns, lineNum = tooltip:GetColumnCount()
 	local currentBNContact
 
 	if numBNetOnline > 0 then
@@ -137,58 +130,48 @@ local function TooltipAddBNetContacts(tooltip)
 	for friendIndex = 1, numBNetOnline do
 		local presenceID, presenceName, battleTag, isBattleTag, toonName, toonID, client, isOnline, lastOnline, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(friendIndex)
 		local status = isAFK and icons[CHAT_FLAG_AFK] or isDND and icons[CHAT_FLAG_DND] or ''
+		broadcastText = (broadcastText and broadcastText ~= '') and broadcastText or nil
 
 		local numToons = BNGetNumFriendToons(friendIndex) or 0
-		local showCombinedRow = client ~= 'App' -- numToons == 2 -- app + one client
-		if not showCombinedRow then
-			lineNum = tooltip:AddLine(status, icons['App'], presenceName)
+		if client == BNET_CLIENT_APP and numToons <= 1 then
+			lineNum = tooltip:AddLine(status, BNet_GetClientEmbeddedTexture(client, 0), presenceName)
 			tooltip:SetLineScript(lineNum, 'OnMouseUp', OnCharacterClick, ('bnet:%s'):format(presenceID))
-		end
+		else
+			local _, _, firstClient = BNGetFriendToonInfo(friendIndex, 1)
+			for toonIndex = 1 + (firstClient == BNET_CLIENT_APP and 1 or 0), numToons do
+				local _, toonName, client, realmName, _, faction, race, class, _, zoneName, level, gameText = BNGetFriendToonInfo(friendIndex, toonIndex)
+				realmName = (realmName or '') ~= '' and realmName or nil
+				zoneName  = (zoneName  or '') ~= '' and  zoneName or nil
+				gameText  = (gameText  or '') ~= '' and  gameText or nil
+				noteText  = (noteText  or '') ~= '' and  noteText or nil
 
-		for toonIndex = 1, numToons do
-			local _, toonName, client, realmName, _, faction, race, class, _, zoneName, level, gameText = BNGetFriendToonInfo(friendIndex, toonIndex)
-
-			if client ~= 'App' then
-				local friendName = toonName
+				local friendName = client == BNET_CLIENT_HEROES and presenceName or toonName
 				if class and classColors[class] then
 					friendName = RGBTableToColorCode(classColors[class])..toonName..'|r'
 				end
-				if level then
-					level = RGBTableToColorCode(GetQuestDifficultyColor(tonumber(level or '') or 0))..level..'|r'
-				end
-				local infoText = icons['CONTACT']..presenceName
-				if noteText and noteText ~= '' then
-					infoText = icons['NOTE']..noteText
-				end
+				local infoText = noteText and (icons['NOTE']..noteText) or (icons['CONTACT']..presenceName)
 
-				lineNum = tooltip:AddLine(
-					status,
-					icons[client],
-					friendName,
-					realmName or '',
-					zoneName or '',
-					showCombinedRow and infoText or ''
-				)
+				lineNum = tooltip:AddLine(status, BNet_GetClientEmbeddedTexture(client, 0),
+					friendName .. (broadcastText and (' '..icons['BROADCAST']) or ''),
+					nil, nil, infoText)
 
 				if client == BNET_CLIENT_WOW then
-					if (not realmName or realmName == '') and (not zoneName or zoneName == '')
-						and gameText and gameText ~= '' then
+					level = RGBTableToColorCode(GetQuestDifficultyColor(tonumber(level or '') or 0))..level..'|r'
+					if not realmName and not zoneName and gameText then
 						zoneName, realmName = strsplit('-', gameText)
 						zoneName, realmName = zoneName and zoneName:trim(), realmName and realmName:trim()
 					end
 
-					realmName = ((faction == 'Horde' and RED_FONT_COLOR_CODE)
-						or (faction == 'Alliance' and BATTLENET_FONT_COLOR_CODE)
-						or '') .. realmName .. '|r'
+					local color = (faction == 'Horde' and RED_FONT_COLOR_CODE)
+						or (faction == 'Alliance' and BATTLENET_FONT_COLOR_CODE) or ''
 					tooltip:SetCell(lineNum, 2, level)
-					tooltip:SetCell(lineNum, 4, realmName)
+					tooltip:SetCell(lineNum, 4, color .. realmName .. '|r')
 					tooltip:SetCell(lineNum, 5, zoneName)
 				else
 					tooltip:SetCell(lineNum, 4, gameText, 2)
 				end
 
-				if broadcastText and broadcastText ~= '' then
-					tooltip:SetCell(lineNum, 3, friendName .. ' ' .. icons['BROADCAST'])
+				if broadcastText then
 					tooltip.lines[lineNum].tiptext = broadcastText
 					tooltip:SetLineScript(lineNum, 'OnEnter', ShowTooltip)
 					tooltip:SetLineScript(lineNum, 'OnLeave', GameTooltip_Hide)
@@ -234,7 +217,7 @@ local function TooltipAddContacts(tooltip, needsSeparator)
 			area,
 			note
 		)
-		tooltip:SetLineScript(lineNum, "OnMouseUp", OnCharacterClick, ("friend:%s"):format(name))
+		tooltip:SetLineScript(lineNum, 'OnMouseUp', OnCharacterClick, ('friend:%s'):format(name))
 	end
 	return numFriendsOnline
 end
@@ -242,8 +225,8 @@ end
 local function TooltipAddGuildMembers(tooltip, needsSeparator)
 	GuildRoster() -- need this so GetGuildRosterInfo returns live data
 
-	local guildName = GetGuildInfo("player")
-	local numColumns, lineNum = #tooltip.columns
+	local guildName = GetGuildInfo('player')
+	local numColumns, lineNum = tooltip:GetColumnCount()
 
 	if guildName then
 		if needsSeparator then
@@ -273,7 +256,7 @@ local function TooltipAddGuildMembers(tooltip, needsSeparator)
 		local numGuildMembers = GetNumGuildMembers()
 		for index = 1, numGuildMembers do
 			local fullName, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile, canSoR, _ = GetGuildRosterInfo(index)
-			local name = strsplit("-", fullName)
+			local name = strsplit('-', fullName)
 
 			if online or isMobile then
 				isMobile = isMobile and not online
@@ -282,7 +265,7 @@ local function TooltipAddGuildMembers(tooltip, needsSeparator)
 				zone = isMobile and REMOTE_CHAT or zone
 				local levelColor = GetQuestDifficultyColor(level)
 				local classColor = RAID_CLASS_COLORS[classFileName]
-				local inMyGroup  = UnitInParty(name) or UnitPlayerOrPetInRaid(name) -- TODO: check if this still works with "char-realm"
+				local inMyGroup  = UnitInParty(name) or UnitPlayerOrPetInRaid(name) -- TODO: check if this still works with 'char-realm'
 
 				note        = note and note ~= '' and (HIGHLIGHT_FONT_COLOR_CODE .. note .. '|r') or ''
 				officernote = officernote and officernote ~= '' and (GREEN_FONT_COLOR_CODE .. officernote .. '|r') or nil
@@ -296,7 +279,7 @@ local function TooltipAddGuildMembers(tooltip, needsSeparator)
 					zone,
 					noteText
 				)
-				tooltip:SetLineScript(lineNum, "OnMouseUp", OnCharacterClick, ("guild:%s"):format(fullName))
+				tooltip:SetLineScript(lineNum, 'OnMouseUp', OnCharacterClick, ('guild:%s'):format(fullName))
 			end
 		end
 	end
@@ -305,11 +288,10 @@ end
 
 local tooltip
 local function OnLDBEnter(self)
-	local numColumns = 6
 	if LibQTip:IsAcquired(addonName) then
 		tooltip:Clear()
 	else
-		tooltip = LibQTip:Acquire(addonName, numColumns)
+		tooltip = LibQTip:Acquire(addonName, 6)
 		tooltip:SmartAnchorTo(self)
 		tooltip:SetAutoHideDelay(0.25, self)
 		-- tooltip:Clear()
