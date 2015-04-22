@@ -137,50 +137,51 @@ local function TooltipAddBNetContacts(tooltip)
 			lineNum = tooltip:AddLine(status, BNet_GetClientEmbeddedTexture(client, 0), presenceName)
 			tooltip:SetLineScript(lineNum, 'OnMouseUp', OnCharacterClick, ('bnet:%s'):format(presenceID))
 		else
-			local _, _, firstClient = BNGetFriendToonInfo(friendIndex, 1)
-			for toonIndex = 1 + (firstClient == BNET_CLIENT_APP and 1 or 0), numToons do
+			for toonIndex = 1, numToons do
 				local _, toonName, client, realmName, _, faction, race, class, _, zoneName, level, gameText = BNGetFriendToonInfo(friendIndex, toonIndex)
-				realmName = (realmName or '') ~= '' and realmName or nil
-				zoneName  = (zoneName  or '') ~= '' and  zoneName or nil
-				gameText  = (gameText  or '') ~= '' and  gameText or nil
-				noteText  = (noteText  or '') ~= '' and  noteText or nil
+				if client  ~= BNET_CLIENT_APP then
+					realmName = (realmName or '') ~= '' and realmName or nil
+					zoneName  = (zoneName  or '') ~= '' and  zoneName or nil
+					gameText  = (gameText  or '') ~= '' and  gameText or nil
+					noteText  = (noteText  or '') ~= '' and  noteText or nil
 
-				local friendName = client == BNET_CLIENT_HEROES and presenceName or toonName
-				if class and classColors[class] then
-					friendName = RGBTableToColorCode(classColors[class])..toonName..'|r'
-				end
-				local infoText = noteText and (icons['NOTE']..noteText) or (icons['CONTACT']..presenceName)
+					local friendName = client == BNET_CLIENT_HEROES and presenceName or toonName
+					if class and classColors[class] then
+						friendName = RGBTableToColorCode(classColors[class])..toonName..'|r'
+					end
+					local infoText = noteText and (icons['NOTE']..noteText) or (icons['CONTACT']..presenceName)
 
-				lineNum = tooltip:AddLine(status, BNet_GetClientEmbeddedTexture(client, 0),
-					friendName .. (broadcastText and (' '..icons['BROADCAST']) or ''),
-					nil, nil, infoText)
+					lineNum = tooltip:AddLine(status, BNet_GetClientEmbeddedTexture(client, 0),
+						friendName .. (broadcastText and (' '..icons['BROADCAST']) or ''),
+						nil, nil, infoText)
 
-				if client == BNET_CLIENT_WOW then
-					level = RGBTableToColorCode(GetQuestDifficultyColor(tonumber(level or '') or 0))..level..'|r'
-					if not realmName and not zoneName and gameText then
-						zoneName, realmName = strsplit('-', gameText)
-						zoneName, realmName = zoneName and zoneName:trim(), realmName and realmName:trim()
+					if client == BNET_CLIENT_WOW then
+						level = RGBTableToColorCode(GetQuestDifficultyColor(tonumber(level or '') or 0))..level..'|r'
+						if not realmName and not zoneName and gameText then
+							zoneName, realmName = strsplit('-', gameText)
+							zoneName, realmName = zoneName and zoneName:trim(), realmName and realmName:trim()
+						end
+
+						local color = (faction == 'Horde' and RED_FONT_COLOR_CODE)
+							or (faction == 'Alliance' and BATTLENET_FONT_COLOR_CODE) or ''
+						tooltip:SetCell(lineNum, 2, level)
+						tooltip:SetCell(lineNum, 4, color .. realmName .. '|r')
+						tooltip:SetCell(lineNum, 5, zoneName)
+					else
+						tooltip:SetCell(lineNum, 4, gameText, 2)
 					end
 
-					local color = (faction == 'Horde' and RED_FONT_COLOR_CODE)
-						or (faction == 'Alliance' and BATTLENET_FONT_COLOR_CODE) or ''
-					tooltip:SetCell(lineNum, 2, level)
-					tooltip:SetCell(lineNum, 4, color .. realmName .. '|r')
-					tooltip:SetCell(lineNum, 5, zoneName)
-				else
-					tooltip:SetCell(lineNum, 4, gameText, 2)
-				end
+					if broadcastText then
+						tooltip.lines[lineNum].tiptext = broadcastText
+						tooltip:SetLineScript(lineNum, 'OnEnter', ShowTooltip)
+						tooltip:SetLineScript(lineNum, 'OnLeave', GameTooltip_Hide)
+					end
 
-				if broadcastText then
-					tooltip.lines[lineNum].tiptext = broadcastText
-					tooltip:SetLineScript(lineNum, 'OnEnter', ShowTooltip)
-					tooltip:SetLineScript(lineNum, 'OnLeave', GameTooltip_Hide)
-				end
-
-				if realmName == playerRealm and faction == playerFaction then
-					tooltip:SetLineScript(lineNum, 'OnMouseUp', OnCharacterClick, ('friend:%s'):format(toonName))
-				else
-					tooltip:SetLineScript(lineNum, 'OnMouseUp', OnCharacterClick, ('bnet:%s'):format(presenceID))
+					if realmName == playerRealm and faction == playerFaction then
+						tooltip:SetLineScript(lineNum, 'OnMouseUp', OnCharacterClick, ('friend:%s'):format(toonName))
+					else
+						tooltip:SetLineScript(lineNum, 'OnMouseUp', OnCharacterClick, ('bnet:%s'):format(presenceID))
+					end
 				end
 			end
 		end
