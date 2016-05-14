@@ -1,5 +1,5 @@
-## Interface: 60000
-## Version: 6.0v1
+## Interface: 60200
+## Version: 6.2v1
 ## Author: ckaotik
 
 ## Title: ckaosSocial
@@ -9,7 +9,7 @@
 # libraries
 libs\LibStub.lua
 libs\LibDataBroker-1.1.lua
-libs\LibQTip-1.0\LibQTip-1.0.xml
+libs\LibQTip-1.0\lib.xml
 #@end-no-lib-strip@
 
 ckaosSocial.lua
