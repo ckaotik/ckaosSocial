@@ -10,7 +10,7 @@ local strfind, strsub, strrev = strfind, strsub, strrev
 -- GLOBALS: hooksecurefunc
 
 -- GLOBALS: RED_FONT_COLOR_CODE, BATTLENET_FONT_COLOR_CODE, RAID_CLASS_COLORS, CHAT_FLAG_AFK, CHAT_FLAG_DND, BNET_CLIENT_WOW, REMOTE_CHAT, HIGHLIGHT_FONT_COLOR_CODE, GREEN_FONT_COLOR_CODE, NORMAL_FONT_COLOR, FriendsFrame
--- GLOBALS: FillLocalizedClassList, BNGetNumFriends, BNGetFriendInfo, BNGetNumFriendToons, BNGetFriendToonInfo, BNGetFriendIndex, BNGetNumFriendInvites, GetQuestDifficultyColor, GetGuildInfo, GetGuildRosterMOTD, CanEditPublicNote, CanEditOfficerNote, SetGuildRosterSelection, SortGuildRoster, GetNumFriends, GetFriendInfo, GetNumGuildMembers, GetGuildRosterInfo, UnitFactionGroup, UnitInParty, UnitPlayerOrPetInRaid, SetItemRef, StaticPopup_Show, InviteUnit, IsAltKeyDown, IsControlKeyDown, ToggleFriendsFrame, ToggleGuildFrame
+-- GLOBALS: FillLocalizedClassList, BNGetNumFriends, BNGetFriendInfo, BNGetNumFriendGameAccounts, BNGetFriendGameAccountInfo, BNGetFriendIndex, BNGetNumFriendInvites, GetQuestDifficultyColor, GetGuildInfo, GetGuildRosterMOTD, CanEditPublicNote, CanEditOfficerNote, SetGuildRosterSelection, SortGuildRoster, GetNumFriends, GetFriendInfo, GetNumGuildMembers, GetGuildRosterInfo, UnitFactionGroup, UnitInParty, UnitPlayerOrPetInRaid, SetItemRef, StaticPopup_Show, InviteUnit, IsAltKeyDown, IsControlKeyDown, ToggleFriendsFrame, ToggleGuildFrame
 -- GLOBALS: pairs, ipairs, tonumber, strsplit, select
 
 local playerFaction = UnitFactionGroup('player')
@@ -67,7 +67,7 @@ local function OnCharacterClick(self, character, btn, up)
 
 			local toonName, realmName, faction, client
 			for toonIndex = 1, BNGetNumFriendToons(friendIndex) do
-				_, toonName, client, realmName, _, faction = BNGetFriendToonInfo(friendIndex, toonIndex)
+				_, toonName, client, realmName, _, faction = BNGetFriendGameAccountInfo(friendIndex, toonIndex)
 				if client == BNET_CLIENT_WOW and faction == playerFaction then
 					contactInfo = toonName .. '-' .. realmName
 					break
@@ -132,13 +132,13 @@ local function TooltipAddBNetContacts(tooltip)
 		local status = isAFK and icons[CHAT_FLAG_AFK] or isDND and icons[CHAT_FLAG_DND] or ''
 		broadcastText = (broadcastText and broadcastText ~= '') and broadcastText or nil
 
-		local numToons = BNGetNumFriendToons(friendIndex) or 0
+		local numToons = BNGetNumFriendGameAccounts(friendIndex) or 0
 		if client == BNET_CLIENT_APP and numToons <= 1 then
 			lineNum = tooltip:AddLine(status, BNet_GetClientEmbeddedTexture(client, 0), presenceName)
 			tooltip:SetLineScript(lineNum, 'OnMouseUp', OnCharacterClick, ('bnet:%s'):format(presenceID))
 		else
 			for toonIndex = 1, numToons do
-				local _, toonName, client, realmName, _, faction, race, class, _, zoneName, level, gameText = BNGetFriendToonInfo(friendIndex, toonIndex)
+				local _, toonName, client, realmName, _, faction, race, class, _, zoneName, level, gameText = BNGetFriendGameAccountInfo(friendIndex, toonIndex)
 				if client  ~= BNET_CLIENT_APP then
 					realmName = (realmName or '') ~= '' and realmName or nil
 					zoneName  = (zoneName  or '') ~= '' and  zoneName or nil
