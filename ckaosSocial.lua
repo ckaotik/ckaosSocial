@@ -159,7 +159,7 @@ local function TooltipAddBNetContacts(tooltip)
 						level = RGBTableToColorCode(GetQuestDifficultyColor(tonumber(level or '') or 0))..level..'|r'
 						if not realmName and not zoneName and gameText then
 							zoneName, realmName = strsplit('-', gameText)
-							zoneName, realmName = zoneName and zoneName:trim(), realmName and realmName:trim()
+							zoneName, realmName = zoneName and zoneName:trim() or '', realmName and realmName:trim() or ''
 						end
 
 						local color = (faction == 'Horde' and RED_FONT_COLOR_CODE)
