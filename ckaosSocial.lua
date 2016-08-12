@@ -157,7 +157,7 @@ local function TooltipAddBNetContacts(tooltip)
 
 					if client == BNET_CLIENT_WOW then
 						level = RGBTableToColorCode(GetQuestDifficultyColor(tonumber(level or '') or 0))..level..'|r'
-						if not realmName and not zoneName and gameText then
+						if gameText and (not realmName or not zoneName) then
 							zoneName, realmName = strsplit('-', gameText)
 							zoneName, realmName = zoneName and zoneName:trim() or '', realmName and realmName:trim() or ''
 						end
