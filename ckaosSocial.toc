@@ -1,5 +1,5 @@
-## Interface: 60200
-## Version: 6.2v1
+## Interface: 70000
+## Version: 7.0v1
 ## Author: ckaotik
 
 ## Title: ckaosSocial
