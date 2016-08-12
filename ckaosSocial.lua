@@ -66,7 +66,7 @@ local function OnCharacterClick(self, character, btn, up)
 			contactInfo = nil
 
 			local toonName, realmName, faction, client
-			for toonIndex = 1, BNGetNumFriendToons(friendIndex) do
+			for toonIndex = 1, BNGetNumFriendGameAccounts(friendIndex) do
 				_, toonName, client, realmName, _, faction = BNGetFriendGameAccountInfo(friendIndex, toonIndex)
 				if client == BNET_CLIENT_WOW and faction == playerFaction then
 					contactInfo = toonName .. '-' .. realmName
