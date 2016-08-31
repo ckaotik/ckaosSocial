@@ -7,6 +7,7 @@
 
 #@no-lib-strip@
 # libraries
+libs\CallbackHandler-1.0.lua
 libs\LibStub.lua
 libs\LibDataBroker-1.1.lua
 libs\LibQTip-1.0\lib.xml

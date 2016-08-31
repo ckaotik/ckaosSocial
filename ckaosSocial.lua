@@ -134,7 +134,14 @@ local function TooltipAddBNetContacts(tooltip)
 
 		local numToons = BNGetNumFriendGameAccounts(friendIndex) or 0
 		if client == BNET_CLIENT_APP and numToons <= 1 then
-			lineNum = tooltip:AddLine(status, BNet_GetClientEmbeddedTexture(client, 0), presenceName)
+			local infoText = noteText ~= '' and (icons['NOTE'] .. noteText) or ''
+			-- Do not display real name, use battle tag instead.
+			local displayName = presenceName
+			if presenceName and presenceName ~= '' and not isBattleTag then
+				displayName = strsplit('#', battleTag)
+			end
+
+			lineNum = tooltip:AddLine(status, BNet_GetClientEmbeddedTexture(client, 0), displayName, nil, nil, infoText)
 			tooltip:SetLineScript(lineNum, 'OnMouseUp', OnCharacterClick, ('bnet:%s'):format(presenceID))
 		else
 			for toonIndex = 1, numToons do
@@ -145,7 +152,7 @@ local function TooltipAddBNetContacts(tooltip)
 					gameText  = (gameText  or '') ~= '' and  gameText or nil
 					noteText  = (noteText  or '') ~= '' and  noteText or nil
 
-					local friendName = client == BNET_CLIENT_HEROES and presenceName or toonName
+					local friendName = toonName ~= '' and toonName or presenceName
 					if class and classColors[class] then
 						friendName = RGBTableToColorCode(classColors[class])..toonName..'|r'
 					end
