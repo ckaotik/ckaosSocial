@@ -103,7 +103,9 @@ local function OnCharacterClick(self, character, btn, up)
 			StaticPopup_Show('SET_FRIENDNOTE', GetFriendInfo(FriendsFrame.NotesID))
 		elseif contactType == 'bnet' then
 			FriendsFrame.NotesID = contactInfo
-			StaticPopup_Show('SET_BNFRIENDNOTE')
+			local friendIndex = BNGetFriendIndex(contactInfo)
+			local presenceID, presenceName = BNGetFriendInfo(friendIndex)
+			StaticPopup_Show('SET_BNFRIENDNOTE', presenceName)
 		end
 	else
 		-- whisper and /who
