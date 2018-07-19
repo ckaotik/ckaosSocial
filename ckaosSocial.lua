@@ -305,7 +305,7 @@ local function OnLDBEnter(self)
 		tooltip:SmartAnchorTo(self)
 		tooltip:SetAutoHideDelay(0.25, self)
 		-- tooltip:Clear()
-		tooltip:GetFont():SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
+		tooltip:GetFont():SetTextColor(NORMAL_FONT_COLOR:GetRGB())
 	end
 
 	-- battle.net friends
@@ -406,7 +406,7 @@ function addon:ADDON_LOADED(event, arg1)
 
 	for _, event in ipairs({'GUILD_ROSTER_UPDATE', 'FRIENDLIST_UPDATE', -- 'IGNORELIST_UPDATE', 'MUTELIST_UPDATE',
 		'BN_CONNECTED', 'BN_DISCONNECTED', 'BN_FRIEND_LIST_SIZE_CHANGED',
-		'BN_FRIEND_TOON_ONLINE', 'BN_FRIEND_TOON_OFFLINE', 'BN_FRIEND_ACCOUNT_ONLINE', 'BN_FRIEND_ACCOUNT_OFFLINE',
+		--[['BN_FRIEND_TOON_ONLINE', 'BN_FRIEND_TOON_OFFLINE',--]] 'BN_FRIEND_ACCOUNT_ONLINE', 'BN_FRIEND_ACCOUNT_OFFLINE',
 		'BATTLETAG_INVITE_SHOW', 'BN_FRIEND_INVITE_LIST_INITIALIZED', 'BN_FRIEND_INVITE_ADDED', 'BN_FRIEND_INVITE_REMOVED'}) do
 		self:RegisterEvent(event)
 	end
