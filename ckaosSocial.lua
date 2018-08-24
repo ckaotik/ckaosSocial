@@ -135,7 +135,7 @@ local function TooltipAddBNetContacts(tooltip)
 		broadcastText = (broadcastText and broadcastText ~= '') and broadcastText or nil
 
 		local numToons = BNGetNumFriendGameAccounts(friendIndex) or 0
-		if client == BNET_CLIENT_APP and numToons <= 1 then
+		if (client == BNET_CLIENT_APP or client == 'BSAp') and numToons <= 1 then
 			local infoText = noteText ~= '' and (icons['NOTE'] .. noteText) or ''
 			-- Do not display real name, use battle tag instead.
 			local displayName = presenceName
@@ -148,7 +148,7 @@ local function TooltipAddBNetContacts(tooltip)
 		else
 			for toonIndex = 1, numToons do
 				local _, toonName, client, realmName, _, faction, race, class, _, zoneName, level, gameText = BNGetFriendGameAccountInfo(friendIndex, toonIndex)
-				if client  ~= BNET_CLIENT_APP then
+				if client ~= BNET_CLIENT_APP and client ~= 'BSAp' then
 					realmName = (realmName or '') ~= '' and realmName or nil
 					zoneName  = (zoneName  or '') ~= '' and  zoneName or nil
 					gameText  = (gameText  or '') ~= '' and  gameText or nil
